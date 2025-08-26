@@ -9,6 +9,7 @@
   import { Button } from '$lib/components/button';
 
   let { update, dismiss }: UpdatePromptProps = $props();
+  let updating = $state(false);
 </script>
 
 <div
@@ -16,7 +17,15 @@
 >
   <p>A new version of the app is available!</p>
   <div class="flex items-center justify-end gap-2">
-    <Button onclick={() => update?.()}>Update</Button>
+    <Button
+      onclick={() => {
+        updating = true;
+        update?.();
+      }}
+      disabled={updating}
+    >
+      {updating ? 'Updating...' : 'Update'}
+    </Button>
     <Button variant="secondary" onclick={() => dismiss?.()}>Dismiss</Button>
   </div>
 </div>

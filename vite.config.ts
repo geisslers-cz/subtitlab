@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
@@ -16,6 +17,8 @@ export default defineConfig({
       devOptions: {
         enabled: true,
         type: 'module',
+        suppressWarnings: true,
+        resolveTempFolder: () => resolve('./.svelte-kit/pwa'),
       },
       manifest: {
         name: 'Goldcraft Subtitlab',
