@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Goldcraft Subtitlab subtitle projection</title>
+    <style>
+      *,
+      *:before,
+      *:after {
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-sizing: border-box;
+        user-select: none;
+      }
+
+      body,
+      html {
+        background: #000;
+        overflow: hidden;
+      }
+
+      body {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      main {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        width: max-content;
+        flex-flow: column nowrap;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        --transition-in-duration: 0;
+        --transition-out-duration: 0;
+      }
+
+      main p {
+        margin: 0;
+        opacity: 0;
+        white-space: pre-line;
+        text-wrap: balance;
+      }
+
+      main p[data-state='show'] {
+        opacity: 1;
+      }
+
+      main[data-transition-in] p[data-state='show'],
+      main[data-transition-out] p[data-state='hide'] {
+        transition: all var(--transition-duration) ease-out;
+      }
+
+      main[data-transition-in] p[data-state='waiting'] {
+        --transition-duration: 0ms;
+      }
+
+      main[data-transition-in] p[data-state='show'] {
+        --transition-duration: calc(var(--transition-in-duration) * 1ms);
+      }
+
+      main[data-transition-out] p[data-state='hide'] {
+        --transition-duration: calc(var(--transition-out-duration) * 1ms);
+      }
+
+      main[data-transition-in='blur'] p[data-state='waiting'],
+      main[data-transition-out='blur'] p[data-state='hide'] {
+        filter: blur(5vw);
+        transform: scaleX(150%);
+      }
+
+      main[data-transition-in='fly-up'] p[data-state='waiting'],
+      main[data-transition-out='fly-down'] p[data-state='hide'] {
+        transform: translateY(25vh);
+      }
+
+      main[data-transition-in='fly-down'] p[data-state='waiting'],
+      main[data-transition-out='fly-up'] p[data-state='hide'] {
+        transform: translateY(-25vh);
+      }
+
+      main[data-transition-in='fly-left'] p[data-state='waiting'],
+      main[data-transition-out='fly-right'] p[data-state='hide'] {
+        transform: translateX(25vh);
+      }
+
+      main[data-transition-in='fly-right'] p[data-state='waiting'],
+      main[data-transition-out='fly-left'] p[data-state='hide'] {
+        transform: translateX(-25vh);
+      }
+    </style>
+  </head>
+  <body></body>
+</html>
