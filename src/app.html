@@ -10,18 +10,18 @@
     <script type="application/javascript">
       (() => {
         const darkMode = JSON.parse(localStorage.getItem('dark-mode') ?? 'true');
-		    document.documentElement.classList.toggle('dark', darkMode);
+        document.documentElement.classList.toggle('dark', darkMode);
         updateTheme();
 
-			  function updateTheme() {
-			    const elem = document.querySelector('meta[name=theme-color]');
+        function updateTheme() {
+          const elem = document.querySelector('meta[name=theme-color]');
 
           if (!elem) {
             setTimeout(updateTheme, 20);
-			      return;
+            return;
           }
 
-				  elem.setAttribute('content', darkMode ? '#161618' : '#FFFFFF');
+          elem.setAttribute('content', darkMode ? '#161618' : '#FFFFFF');
         }
       })();
     </script>
