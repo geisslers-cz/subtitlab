@@ -23,13 +23,18 @@ export class MidiController {
   #ctrl?: AbortController;
 
   constructor() {
-    navigator.permissions.query({ name: 'midi' }).then(async ({ state }) => {
-      this.#permission = state;
+    navigator.permissions
+      .query({ name: 'midi' })
+      .then(async ({ state }) => {
+        this.#permission = state;
 
-      if (state === 'granted') {
-        await this.init();
-      }
-    });
+        if (state === 'granted') {
+          await this.init();
+        }
+      })
+      .catch(() => {
+        this.#permission = 'denied';
+      });
   }
 
   get permission(): 'granted' | 'prompt' | 'denied' | undefined {
