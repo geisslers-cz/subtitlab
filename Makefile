@@ -8,6 +8,9 @@ clean:
 node_modules:
 	bun install --frozen-lockfile
 
+.PHONY: deps
+deps: node_modules
+
 .PHONY: lint
 lint: node_modules
 	bun x eslint .
