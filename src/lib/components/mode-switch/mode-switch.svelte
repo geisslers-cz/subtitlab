@@ -17,6 +17,10 @@
 
   function set(dark: boolean): void {
     document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('dark-mode', JSON.stringify(dark));
+
+    const { backgroundColor } = window.getComputedStyle(document.body);
+    document.querySelector('meta[name=theme-color]')?.setAttribute('content', backgroundColor);
   }
 </script>
 

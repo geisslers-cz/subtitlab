@@ -1,10 +1,30 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%sveltekit.assets%/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     %sveltekit.head%
+
+    <script type="application/javascript">
+      (() => {
+        const darkMode = JSON.parse(localStorage.getItem('dark-mode') ?? 'true');
+		    document.documentElement.classList.toggle('dark', darkMode);
+        updateTheme();
+
+			  function updateTheme() {
+			    const elem = document.querySelector('meta[name=theme-color]');
+
+          if (!elem) {
+            setTimeout(updateTheme, 20);
+			      return;
+          }
+
+				  elem.setAttribute('content', darkMode ? '#161618' : '#FFFFFF');
+        }
+      })();
+    </script>
   </head>
   <body data-sveltekit-preload-data="hover">
     <div style="display: contents">%sveltekit.body%</div>
