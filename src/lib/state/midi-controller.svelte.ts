@@ -1,5 +1,5 @@
 import { SvelteMap } from 'svelte/reactivity';
-import type { MidiTrigger } from '$lib/data';
+import type { MidiBank, MidiTrigger } from '$lib/data';
 import { cc, messageType } from '$lib/utils';
 
 export type MIDIInputInfo = {
@@ -18,9 +18,10 @@ export class MidiController {
     new Set([...this.#enabled.values()].filter((info) => !this.#inputs.has(info.id))),
   );
   readonly #map: Map<number, () => void> = new Map();
-  readonly #bankSelect: [number, number][] = [...new Array(16).keys()].map(() => [0, 0]);
+  readonly #bankSelect: MidiBank[] = [...new Array(16).keys()].map(() => ({ lsb: 0, msb: 0 }));
   #permission?: 'granted' | 'prompt' | 'denied' = $state();
   #ctrl?: AbortController;
+  #learn?: (trigger: MidiTrigger) => void;
 
   constructor() {
     navigator.permissions
@@ -97,7 +98,7 @@ export class MidiController {
   }
 
   map(trigger: MidiTrigger, action: () => void): (() => void) | void {
-    const key = triggerToKey(trigger);
+    const key = this.#triggerToKey(trigger);
     this.#map.set(key, action);
 
     return () => {
@@ -106,7 +107,23 @@ export class MidiController {
   }
 
   isMapped(trigger: MidiTrigger): boolean {
-    return this.#map.has(triggerToKey(trigger));
+    return this.#map.has(this.#triggerToKey(trigger));
+  }
+
+  learn(signal?: AbortSignal): Promise<MidiTrigger> {
+    const { promise, resolve, reject }: PromiseWithResolvers<MidiTrigger> = Promise.withResolvers();
+    const withCleanup = <Args extends any[], R>(
+      cb: (...args: Args) => R,
+    ): ((...args: Args) => R) => {
+      return (...args) => {
+        this.#learn = undefined;
+        return cb(...args);
+      };
+    };
+
+    this.#learn = withCleanup(resolve);
+    signal?.addEventListener('abort', withCleanup(reject));
+    return promise;
   }
 
   #mergeInputs(inputs: MIDIInputMap): void {
@@ -139,38 +156,93 @@ export class MidiController {
     }
 
     const [status, d1, d2 = 0x00] = evt.data;
+
+    if ((status & 0xf0) === messageType.cc) {
+      this.#cc(status & 0x0f, d1, d2);
+      return;
+    }
+
+    if (this.#learn) {
+      const trigger = this.#messageToTrigger(status, d1, d2);
+
+      if (trigger) {
+        this.#learn(trigger);
+      }
+
+      return;
+    }
+
+    const key = this.#messageToKey(status, d1, d2);
+
+    if (key !== undefined) {
+      this.#trigger(key);
+    }
+  };
+
+  #cc(channel: number, bank: number, value: number): void {
+    switch (bank) {
+      case cc.bankSelectMsb:
+        this.#bankSelect[channel].msb = value;
+        break;
+      case cc.bankSelectLsb:
+        this.#bankSelect[channel].lsb = value;
+        break;
+    }
+  }
+
+  #trigger(key: number): void {
+    this.#map.get(key)?.();
+  }
+
+  #triggerToKey(trigger: MidiTrigger): number {
+    if (trigger.type === 'note') {
+      return (status(messageType.noteOn, trigger) << 8) | word(trigger.note);
+    }
+
+    return (
+      (word(trigger.bank.msb) << 24) |
+      (word(trigger.bank.lsb) << 16) |
+      (status(messageType.program, trigger) << 8) |
+      word(trigger.program)
+    );
+  }
+
+  #messageToKey(status: number, d1: number, d2: number): number | undefined {
     const type = status & 0xf0;
     const channel = status & 0x0f;
 
     switch (type) {
-      case messageType.cc:
-        switch (d1) {
-          case cc.bankSelectMsb:
-            this.#bankSelect[channel][0] = d2;
-            break;
-          case cc.bankSelectLsb:
-            this.#bankSelect[channel][1] = d2;
-            break;
-        }
-        break;
       case messageType.program:
-        this.#trigger(
-          (this.#bankSelect[channel][0] << 24) |
-            (this.#bankSelect[channel][1] << 16) |
-            (status << 8) |
-            d1,
+        return (
+          (this.#bankSelect[channel].msb << 24) |
+          (this.#bankSelect[channel].lsb << 16) |
+          (status << 8) |
+          d1
         );
-        break;
       case messageType.noteOn:
-        if (d2 !== 0) {
-          this.#trigger((status << 8) | d1);
-        }
-        break;
+        return d2 !== 0 ? (status << 8) | d1 : undefined;
     }
-  };
 
-  #trigger(key: number): void {
-    this.#map.get(key)?.();
+    return undefined;
+  }
+
+  #messageToTrigger(status: number, d1: number, d2: number): MidiTrigger | undefined {
+    const type = status & 0xf0;
+    const channel = status & 0x0f;
+
+    switch (type) {
+      case messageType.program:
+        return {
+          type: 'program',
+          bank: this.#bankSelect[channel],
+          channel,
+          program: d1,
+        };
+      case messageType.noteOn:
+        return d2 !== 0 ? { type: 'note', channel, note: d1 } : undefined;
+    }
+
+    return undefined;
   }
 }
 
@@ -185,19 +257,6 @@ function saveEnabled(inputs: Map<string, MIDIInputInfo>): void {
   } else {
     localStorage.removeItem('midi-inputs');
   }
-}
-
-function triggerToKey(trigger: MidiTrigger): number {
-  if (trigger.type === 'note') {
-    return (status(messageType.noteOn, trigger) << 8) | word(trigger.note);
-  }
-
-  return (
-    (word(trigger.bank.msb) << 24) |
-    (word(trigger.bank.lsb) << 16) |
-    (status(messageType.program, trigger) << 8) |
-    word(trigger.program)
-  );
 }
 
 function status(value: number, trigger: MidiTrigger): number {

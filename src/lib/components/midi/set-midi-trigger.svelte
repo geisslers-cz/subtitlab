@@ -44,6 +44,7 @@
 
   let { trigger = $bindable(), isOpen = $bindable(false), ...rest }: SetMidiTriggerProps = $props();
   let open = $state(false);
+  let learn = $state(false);
   let type = $derived(trigger?.type ?? 'note');
   let channel = $derived(trigger?.channel ?? 0);
   let value = $derived(
@@ -60,18 +61,39 @@
 
   let used = $derived(!isSame(current, trigger) && ui.midi.isMapped(current));
 
+  $effect(() => {
+    if (!open || !learn) {
+      return;
+    }
+
+    const ctrl = new AbortController();
+
+    ui.midi.learn(ctrl.signal).then((trigger) => {
+      type = trigger.type;
+      channel = trigger.channel;
+      value = trigger.type === 'note' ? trigger.note : trigger.program;
+      bankMsb = trigger.type === 'program' ? trigger.bank.msb : 0;
+      bankLsb = trigger.type === 'program' ? trigger.bank.lsb : 0;
+      learn = false;
+    });
+
+    return () => {
+      ctrl.abort();
+    };
+  });
+
   function onsubmit(evt: SubmitEvent): void {
     evt.preventDefault();
 
     if (!used) {
       trigger = current;
-      open = false;
+      open = learn = false;
     }
   }
 
   function clear(): void {
     trigger = undefined;
-    open = false;
+    open = learn = false;
   }
 </script>
 
@@ -182,6 +204,9 @@
         {/if}
       </div>
       <Dialog.Footer class="flex items-center gap-2">
+        <Button variant="secondary" active={learn} onclick={() => (learn = !learn)}>
+          {learn ? 'Learning...' : 'Learn'}
+        </Button>
         {#if trigger}
           <Button variant="secondary" onclick={clear}>Remove trigger</Button>
         {/if}

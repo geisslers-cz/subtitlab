@@ -1,13 +1,15 @@
 import { type Oklch, oklch } from '$lib/components/color-picker';
 
+export type MidiBank = {
+  msb: number;
+  lsb: number;
+};
+
 export type MidiNoteTrigger = { type: 'note'; channel: number; note: number };
 export type MidiProgramTrigger = {
   type: 'program';
   channel: number;
-  bank: {
-    msb: number;
-    lsb: number;
-  };
+  bank: MidiBank;
   program: number;
 };
 export type MidiTrigger = MidiNoteTrigger | MidiProgramTrigger;
