@@ -4,7 +4,7 @@
   import { EditorKeymap } from './keymap';
 
   export type EditTimelineProps = {
-    scene: TimedScene;
+    scene?: TimedScene;
     disabled?: boolean;
     isOpen?: boolean;
     class?: ClassValue;
@@ -42,7 +42,13 @@
 >
   <Drawer.Trigger class={className}>
     {#snippet child({ props })}
-      <Button variant="ghost" size="xs" {disabled} tooltip="Edit timeline" {...props}>
+      <Button
+        variant="ghost"
+        size="xs"
+        disabled={disabled || !scene}
+        tooltip="Edit timeline"
+        {...props}
+      >
         <Icon class="icon-[lucide--film]" />
         <span class="sr-only">Edit timeline</span>
       </Button>
@@ -56,8 +62,10 @@
       'data-[vaul-drawer-direction=bottom]:rounded-none',
     ]}
   >
-    <AudioPlayer>
-      <Editor {scene} {keymap} close={() => (open = false)} />
-    </AudioPlayer>
+    {#if scene}
+      <AudioPlayer>
+        <Editor {scene} {keymap} close={() => (open = false)} />
+      </AudioPlayer>
+    {/if}
   </Drawer.Content>
 </Drawer.Root>

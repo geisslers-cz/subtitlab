@@ -11,7 +11,6 @@
   import { lastShown } from '$lib/data';
   import { useUiContext } from '$lib/state';
   import MidiTrigger from '../common/midi-trigger.svelte';
-  import CuePanel from '../panel/cue-panel.svelte';
   import CueChain from './cue-chain.svelte';
   import CueProgress from './cue-progress.svelte';
   import CueText from './cue-text.svelte';
@@ -22,7 +21,6 @@
 
   let { cue }: CueProps = $props();
   let elem: HTMLLIElement | null = $state(null);
-  let hover: boolean = $state(false);
 
   let cueState = $derived(cue === ui.cursor?.cue ? 'selected' : ui.playhead?.chain.get(cue));
 
@@ -74,14 +72,7 @@
   ]}
 >
   {#snippet child(props)}
-    <li
-      bind:this={elem}
-      data-state={cueState}
-      {onclick}
-      onpointerenter={() => (hover = true)}
-      onpointerleave={() => (hover = false)}
-      {...props}
-    >
+    <li bind:this={elem} data-state={cueState} {onclick} {...props}>
       {#if cue instanceof TimedCue}
         <CueProgress {cue} />
       {/if}
@@ -96,7 +87,6 @@
         {/if}
       </div>
       <CueChain {cue} />
-      <CuePanel {cue} show={hover} />
     </li>
   {/snippet}
 </SortableItem>

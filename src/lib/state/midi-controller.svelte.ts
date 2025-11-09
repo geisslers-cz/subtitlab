@@ -75,9 +75,11 @@ export class MidiController {
     }
   }
 
-  toggle(input: MIDIInput, on: boolean): void {
+  toggle(id: string, on: boolean): void {
+    const input = this.#inputs.get(id);
+
     if (on) {
-      if (this.#enabled.has(input.id)) {
+      if (!input || this.#enabled.has(input.id)) {
         return;
       }
 
@@ -91,8 +93,8 @@ export class MidiController {
 
       saveEnabled(this.#enabled);
     } else {
-      input.removeEventListener('midimessage', this.#handleMessage);
-      this.#enabled.delete(input.id);
+      input?.removeEventListener('midimessage', this.#handleMessage);
+      this.#enabled.delete(id);
       saveEnabled(this.#enabled);
     }
   }
@@ -132,19 +134,19 @@ export class MidiController {
       const enabled = this.#enabled.delete(id);
 
       if (existing && existing !== input) {
-        this.toggle(input, false);
+        this.toggle(id, false);
       }
 
       this.#inputs.set(id, input);
 
       if (enabled) {
-        this.toggle(input, true);
+        this.toggle(id, true);
       }
     }
 
-    for (const [id, input] of this.#inputs) {
+    for (const id of this.#inputs.keys()) {
       if (!inputs.has(id)) {
-        this.toggle(input, false);
+        this.toggle(id, false);
         this.#inputs.delete(id);
       }
     }

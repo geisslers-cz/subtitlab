@@ -2,7 +2,7 @@
   import type { AnyCue } from '$lib/data';
 
   export type ChainCueProps = {
-    cue: AnyCue;
+    cue?: AnyCue;
   };
 </script>
 
@@ -14,7 +14,7 @@
   let { cue }: ChainCueProps = $props();
 
   function onclick(): void {
-    if (cue.previous instanceof ManualCue) {
+    if (cue && cue.previous instanceof ManualCue) {
       cue.previous.chain = !cue.previous.chain;
     }
   }
@@ -23,8 +23,8 @@
 <Button
   variant="ghost"
   size="xs"
-  disabled={!cue.previous || !(cue instanceof ManualCue)}
-  active={cue.previous?.chain}
+  disabled={!cue || !cue.previous || !(cue instanceof ManualCue)}
+  active={cue && cue.previous?.chain}
   tooltip="Chain with previous cue"
   {onclick}
 >

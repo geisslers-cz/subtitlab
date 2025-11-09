@@ -5,13 +5,17 @@
   import { type AnyCue, type Collection, TimedScene } from '$lib/data';
   import { useProjectContext } from '$lib/state';
   import Cue from './cue/cue.svelte';
+  import Panel from './panel/panel.svelte';
   import SceneHeader from './scene/scene-header.svelte';
 
   const project = useProjectContext();
 </script>
 
 <div class="flex h-full flex-col">
-  <h3 class="mx-2 border-b px-3 pb-2">Cues</h3>
+  <div class="mx-2 flex items-center border-b px-1 pb-2">
+    <h3 class="grow px-2">Cues</h3>
+    <Panel />
+  </div>
   <ScrollArea class="grow">
     <ul class="m-0 list-none px-3 pt-2 pb-6">
       {#if project.loading}

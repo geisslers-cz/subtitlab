@@ -3,7 +3,7 @@
   import type { ClassValue } from '$lib/utils';
 
   export type RemoveCueProps = {
-    cue: AnyCue;
+    cue?: AnyCue;
     class?: ClassValue;
   };
 </script>
@@ -18,11 +18,13 @@
   let { cue, class: className }: RemoveCueProps = $props();
 
   function onclick(): void {
-    ui.removeCue(cue);
+    if (cue) {
+      ui.removeCue(cue);
+    }
   }
 </script>
 
-<Button variant="ghost" size="xs" tooltip="Remove" class={className} {onclick}>
+<Button variant="ghost" size="xs" tooltip="Remove" class={className} {onclick} disabled={!cue}>
   <Icon class="icon-[lucide--trash]" />
   <span class="sr-only">Remove</span>
 </Button>

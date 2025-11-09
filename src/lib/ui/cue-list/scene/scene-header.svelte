@@ -13,13 +13,11 @@
   import { useUiContext } from '$lib/state';
   import { cn } from '$lib/utils';
   import MidiTrigger from '../common/midi-trigger.svelte';
-  import ScenePanel from '../panel/scene-panel.svelte';
 
   const ui = useUiContext();
 
   let { act, scene }: SceneHeaderProps = $props();
   let elem: HTMLDivElement | null = $state(null);
-  let hover: boolean = $state(false);
 
   $effect(() => {
     if (elem && scene === ui.cursor?.scene) {
@@ -43,13 +41,11 @@
 <div
   bind:this={elem}
   class={cn(
-    'relative flex items-center gap-2 rounded py-2 pl-2',
+    'relative flex items-center gap-2 rounded p-2',
     'hover:bg-muted/50 cursor-pointer',
     'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground',
   )}
   data-selected={scene === ui.cursor?.scene && !ui.cursor.cue}
-  onpointerenter={() => (hover = true)}
-  onpointerleave={() => (hover = false)}
   {onclick}
 >
   <Icon
@@ -59,7 +55,6 @@
   <hr class="h-0 grow border-t border-dotted bg-transparent" />
   {#if scene instanceof TimedScene && scene.trigger}
     <MidiTrigger trigger={scene.trigger} />
-    <hr class="h-0 w-6 border-t border-dotted bg-transparent" />
+    <hr class="h-0 w-4 border-t border-dotted bg-transparent" />
   {/if}
-  <ScenePanel {scene} show={hover} />
 </div>

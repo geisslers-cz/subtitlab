@@ -206,7 +206,10 @@ export class DefaultUiContext implements UiContext {
   }
 
   addCue(scene?: AnyScene, after?: AnyCue): void {
-    scene ??= this.#project.current.acts.last?.scenes.last;
+    if (!scene) {
+      scene = this.#project.current.acts.last?.scenes.last;
+      after = scene?.cues.last;
+    }
 
     if (!scene) {
       return;
@@ -234,15 +237,9 @@ export class DefaultUiContext implements UiContext {
   }
 
   removeCue(cue: AnyCue): void {
-    const next = cue.next;
-    const scene = cue.parent;
-    scene.cues.remove(cue as any);
-
-    if (next) {
-      this.selectCue(next);
-    } else {
-      this.selectScene(scene.next ?? scene);
-    }
+    const next = getNextCueOrScene(cursorForCue(cue));
+    cue.parent.cues.remove(cue as any);
+    this.#cursor = next;
   }
 
   reformat(cue: AnyCue): void {
@@ -516,6 +513,8 @@ function resolveAspectRatio(details: ScreenDetails): number | undefined {
   return largest ? largest.width / largest.height : undefined;
 }
 
+function cursorForScene(scene: AnyScene): Cursor;
+function cursorForScene(scene?: AnyScene): Cursor | undefined;
 function cursorForScene(scene?: AnyScene): Cursor | undefined {
   if (!scene) {
     return undefined;
@@ -524,6 +523,8 @@ function cursorForScene(scene?: AnyScene): Cursor | undefined {
   return { act: scene.parent, scene };
 }
 
+function cursorForCue(cue: AnyCue): Cursor;
+function cursorForCue(cue?: AnyCue): Cursor | undefined;
 function cursorForCue(cue?: AnyCue): Cursor | undefined {
   if (!cue) {
     return undefined;

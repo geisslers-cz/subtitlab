@@ -2,7 +2,7 @@
   import type { ManualCue, TimedScene } from '$lib/data';
 
   export type SetMidiTriggerProps = {
-    target: ManualCue | TimedScene;
+    target?: ManualCue | TimedScene;
     isOpen?: boolean;
   };
 </script>
@@ -15,11 +15,18 @@
   let { target = $bindable(), isOpen = $bindable(false) }: SetMidiTriggerProps = $props();
 </script>
 
-<SetMidiTrigger bind:isOpen bind:trigger={target.trigger}>
-  {#snippet child({ props })}
-    <Button variant="ghost" size="xs" active={!!target.trigger} {...props} tooltip="MIDI trigger">
-      <Icon class="icon-[lucide--keyboard-music]" />
-      <span class="sr-only">MIDI trigger</span>
-    </Button>
-  {/snippet}
-</SetMidiTrigger>
+{#if target}
+  <SetMidiTrigger bind:isOpen bind:trigger={target.trigger}>
+    {#snippet child({ props })}
+      <Button variant="ghost" size="xs" active={!!target.trigger} {...props} tooltip="MIDI trigger">
+        <Icon class="icon-[lucide--keyboard-music]" />
+        <span class="sr-only">MIDI trigger</span>
+      </Button>
+    {/snippet}
+  </SetMidiTrigger>
+{:else}
+  <Button variant="ghost" size="xs" disabled tooltip="MIDI trigger">
+    <Icon class="icon-[lucide--keyboard-music]" />
+    <span class="sr-only">MIDI trigger</span>
+  </Button>
+{/if}

@@ -21,8 +21,12 @@
   const enabled = box.with(
     () => [...ui.midi.enabled.keys()],
     (enabled) => {
-      for (const input of ui.midi.inputs.values()) {
-        ui.midi.toggle(input, enabled.includes(input.id));
+      for (const id of ui.midi.inputs.keys()) {
+        ui.midi.toggle(id, enabled.includes(id));
+      }
+
+      for (const { id } of ui.midi.missing) {
+        ui.midi.toggle(id, enabled.includes(id));
       }
     },
   );
@@ -43,7 +47,13 @@
   <Select.Root type="multiple" bind:value={enabled.current}>
     <Select.Trigger
       {id}
-      class={cn('grid grid-cols-[1fr_min-content] items-center', className)}
+      class={cn(
+        'grid items-center',
+        ui.midi.missing.size
+          ? 'grid-cols-[1fr_min-content_min-content]'
+          : 'grid-cols-[1fr_min-content]',
+        className,
+      )}
       {onclick}
     >
       <span class="overflow-hidden text-start text-ellipsis whitespace-nowrap">

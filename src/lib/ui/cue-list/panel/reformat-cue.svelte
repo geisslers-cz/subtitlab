@@ -2,7 +2,7 @@
   import type { AnyCue } from '$lib/data';
 
   export type ReformatCueProps = {
-    cue: AnyCue;
+    cue?: AnyCue;
   };
 </script>
 
@@ -16,11 +16,13 @@
   let { cue }: ReformatCueProps = $props();
 
   function onclick(): void {
-    ui.reformat(cue);
+    if (cue) {
+      ui.reformat(cue);
+    }
   }
 </script>
 
-<Button variant="ghost" size="xs" tooltip="Reformat cue" {onclick}>
+<Button variant="ghost" size="xs" tooltip="Reformat cue" {onclick} disabled={!cue}>
   <Icon class="icon-[lucide--wand-sparkles]" />
   <span class="sr-only">Reformat cue</span>
 </Button>

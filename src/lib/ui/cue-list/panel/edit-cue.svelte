@@ -2,7 +2,7 @@
   import type { AnyCue } from '$lib/data';
 
   export type EditCueProps = {
-    cue: AnyCue;
+    cue?: AnyCue;
   };
 </script>
 
@@ -16,11 +16,13 @@
   let { cue }: EditCueProps = $props();
 
   function onclick(): void {
-    ui.editCue(cue);
+    if (cue) {
+      ui.editCue(cue);
+    }
   }
 </script>
 
-<Button variant="ghost" size="xs" tooltip="Edit cue" {onclick}>
+<Button variant="ghost" size="xs" tooltip="Edit cue" {onclick} disabled={!cue}>
   <Icon class="icon-[lucide--pen-square]" />
   <span class="sr-only">Edit cue</span>
 </Button>

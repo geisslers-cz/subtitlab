@@ -2,9 +2,9 @@
   import type { AnyCue, AnyScene } from '$lib/data';
 
   export type AddCueProps = {
-    scene: AnyScene;
+    scene?: AnyScene;
     after?: AnyCue;
-    chain?: boolean;
+    disabled?: boolean;
     class?: string;
   };
 </script>
@@ -14,7 +14,7 @@
   import { Icon } from '$lib/components/icon';
   import { useUiContext } from '$lib/state';
 
-  let { scene, after, class: className }: AddCueProps = $props();
+  let { scene, after, disabled, class: className }: AddCueProps = $props();
 
   const ui = useUiContext();
 
@@ -23,7 +23,7 @@
   }
 </script>
 
-<Button variant="ghost" size="xs" tooltip="Add cue" class={className} {onclick}>
+<Button variant="ghost" size="xs" tooltip="Add cue" class={className} {disabled} {onclick}>
   <Icon class="icon-[lucide--list-plus]" />
   <span class="sr-only">Add cue</span>
 </Button>
